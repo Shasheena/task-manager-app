@@ -2,72 +2,92 @@ const taskInput = document.getElementById("taskInput");
 const addTaskBtn = document.getElementById("addTaskBtn");
 const taskList = document.getElementById("taskList");
 
-let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+const API_URL = "http://localhost:5000/api/tasks";
 
-function saveTasks() {
-  localStorage.setItem("tasks", JSON.stringify(tasks));
+async function fetchTasks() {
+const response = await fetch(API_URL);
+const tasks = await response.json();
+
+renderTasks(tasks);
 }
 
-function renderTasks() {
-  taskList.innerHTML = "";
+function renderTasks(tasks) {
+taskList.innerHTML = "";
 
-  tasks.forEach((task, index) => {
-    const li = document.createElement("li");
+tasks.forEach(task => {
+const li = document.createElement("li");
 
-    const taskText = document.createElement("span");
-    taskText.textContent = task.text;
 
-    if (task.completed) {
-      taskText.classList.add("completed");
-    }
+const taskText = document.createElement("span");
+taskText.textContent = task.text;
 
-    const buttonDiv = document.createElement("div");
-    buttonDiv.classList.add("task-buttons");
-
-    const completeBtn = document.createElement("button");
-    completeBtn.textContent = "✔";
-    completeBtn.classList.add("complete-btn");
-
-    completeBtn.addEventListener("click", () => {
-      tasks[index].completed = !tasks[index].completed;
-      saveTasks();
-      renderTasks();
-    });
-
-    const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = "✖";
-    deleteBtn.classList.add("delete-btn");
-
-    deleteBtn.addEventListener("click", () => {
-      tasks.splice(index, 1);
-      saveTasks();
-      renderTasks();
-    });
-
-    buttonDiv.appendChild(completeBtn);
-    buttonDiv.appendChild(deleteBtn);
-
-    li.appendChild(taskText);
-    li.appendChild(buttonDiv);
-
-    taskList.appendChild(li);
-  });
+if (task.completed) {
+  taskText.classList.add("completed");
 }
 
-addTaskBtn.addEventListener("click", () => {
-  const taskText = taskInput.value.trim();
+const buttonDiv = document.createElement("div");
+buttonDiv.classList.add("task-buttons");
 
-  if (taskText === "") return;
+const completeBtn = document.createElement("button");
+completeBtn.textContent = "✔";
+completeBtn.classList.add("complete-btn");
 
-  tasks.push({
-    text: taskText,
-    completed: false
+completeBtn.addEventListener("click", async () => {
+  await fetch(`${API_URL}/${task._id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      completed: !task.completed
+    })
   });
 
-  saveTasks();
-  renderTasks();
-
-  taskInput.value = "";
+  fetchTasks();
 });
 
-renderTasks();
+const deleteBtn = document.createElement("button");
+deleteBtn.textContent = "✖";
+deleteBtn.classList.add("delete-btn");
+
+deleteBtn.addEventListener("click", async () => {
+  await fetch(`${API_URL}/${task._id}`, {
+    method: "DELETE"
+  });
+
+  fetchTasks();
+});
+
+buttonDiv.appendChild(completeBtn);
+buttonDiv.appendChild(deleteBtn);
+
+li.appendChild(taskText);
+li.appendChild(buttonDiv);
+
+taskList.appendChild(li);
+
+
+});
+}
+
+addTaskBtn.addEventListener("click", async () => {
+const taskText = taskInput.value.trim();
+
+if (!taskText) return;
+
+await fetch(API_URL, {
+method: "POST",
+headers: {
+"Content-Type": "application/json"
+},
+body: JSON.stringify({
+text: taskText
+})
+});
+
+taskInput.value = "";
+
+fetchTasks();
+});
+
+fetchTasks();
