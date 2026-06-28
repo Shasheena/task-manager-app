@@ -8,14 +8,6 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
-            steps {
-                dir('backend') {
-                    sh 'npm install'
-                }
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 dir('backend') {
