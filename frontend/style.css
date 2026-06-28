@@ -10,6 +10,12 @@ body {
   display: flex;
   justify-content: center;
   padding-top: 50px;
+
+  background-image: url("images/background.jpg"); /* Change the path to your image */
+  background-size: cover;        /* Makes the image cover the entire screen */
+  background-position: center;   /* Centers the image */
+  background-repeat: no-repeat;  /* Prevents repeating */
+  background-attachment: fixed;
 }
 
 .container {
